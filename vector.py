@@ -81,6 +81,31 @@ class Vector(object):
     def is_parallel_to(self, other):
         return self.is_zero() or other.is_zero() or self.angle(other) == 0.0 or self.angle(other) == pi
 
+    def cross(self, other):
+        try:
+            x_1, y_1, z_1 = self.coordinates
+            x_2, y_2, z_2 = other.coordinates
+            new_coordinates = [y_1*z_2 - y_2*z_1,
+                               -(x_1*z_2 - x_2*z_1),
+                               x_1*y_2 - x_2*y_1]
+            return Vector(new_coordinates)
+        except ValueError as e:
+            msg = str(e)
+            if msg == 'need more than 2 values to unpack':
+                self_emb_in_R3 = Vector(self.coordinates + ('0',))
+                other_emb_in_R3 = Vector(other.coordinates + ('0',))
+                return self_emb_in_R3.cross(other_emb_in_R3)
+            else:
+                raise e
+
+    def area_parallelogram_with(self, other):
+        cross_product = self.cross(other)
+        return cross_product.magnitude()
+
+    def area_triangle_with(self, other):
+        return Decimal(self.area_parallelogram_with(other)) / Decimal('2.0')
+
+
 
 # add, sub, scalar multiplication
 print(Vector([8.218, -9.341]) + Vector([-1.129, 2.111]))
@@ -119,3 +144,17 @@ print(Vector([-2.328, -7.284, -1.214]).is_orthogonal_to(Vector([-1.821, 1.072, -
 print("")
 print(Vector([2.118, 4.827]).is_parallel_to(Vector([0, 0])))
 print(Vector([2.118, 4.827]).is_orthogonal_to(Vector([0, 0])))
+
+# cross products
+print("cross products")
+v = Vector([8.462, 7.893, -8.187])
+w = Vector([6.984, -5.975, 4.778])
+print(v.cross(w))
+
+v = Vector([-8.987, -9.838, 5.031])
+w = Vector([-4.268, -1.861, -8.866])
+print(v.area_parallelogram_with(w))
+
+v = Vector([1.5, 9.547, 3.691])
+w = Vector([-6.007, 0.124, 5.772])
+print(v.area_triangle_with(w))
